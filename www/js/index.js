@@ -31,55 +31,47 @@ var app = {
     // deviceready Event Handler
     //
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
-    // function, we must explicity call 'app.receivedEvent(...);'
+    // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        app.receivedEvent('deviceready');
-        var pushNotification = window.plugins.pushNotification;
-        pushNotification.register(app.successHandler, app.errorHandler,{"senderID":"1092587381698","ecb":"app.onNotificationGCM"});
+        var push = PushNotification.init({
+            "android": {
+                "senderID": "1092587381698"
+            },
+            "ios": {"alert": "true", "badge": "true", "sound": "true"}, 
+            "windows": {} 
+        });
+        
+        push.on('registration', function(data) {
+            console.log("registration event");
+            document.getElementById("regId").innerHTML = data.registrationId;
+            console.log(JSON.stringify(data));
+        });
 
-    },
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
+        push.on('notification', function(data) {
+        	console.log("notification event");
+            console.log(JSON.stringify(data));
+            var cards = document.getElementById("cards");
+            var card = '<div class="row">' +
+		  		  '<div class="col s12 m6">' +
+				  '  <div class="card darken-1">' +
+				  '    <div class="card-content black-text">' +
+				  '      <span class="card-title black-text">' + data.title + '</span>' +
+				  '      <p>' + data.message + '</p>' +
+				  '    </div>' +
+				  '  </div>' +
+				  ' </div>' +
+				  '</div>';
+            cards.innerHTML += card;
+            
+            push.finish(function () {
+                console.log('finish successfully called');
+            });
+        });
 
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
-
-        console.log('Received Event: ' + id);
-    },
-    // result contains any message sent from the plugin call
-    successHandler: function(result) {
-        alert('Callback Success! Result = '+result)
-    },
-    errorHandler:function(error) {
-        alert(error);
-    },
-    onNotificationGCM: function(e) {
-        switch( e.event )
-        {
-            case 'registered':
-                if ( e.regid.length > 0 )
-                {
-                    console.log("Regid " + e.regid);
-                    alert('registration id = '+e.regid);
-                }
-                break;
-
-            case 'message':
-                // this is the actual push notification. its format depends on the data model from the push server
-                alert('message = '+e.message+' msgcnt = '+e.msgcnt);
-                break;
-
-            case 'error':
-                alert('GCM error = '+e.msg);
-                break;
-
-            default:
-                alert('An unknown GCM event has occurred');
-                break;
-        }
+        push.on('error', function(e) {
+            console.log("push error");
+        });
     }
-
 };
+
+app.initialize();
