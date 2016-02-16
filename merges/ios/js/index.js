@@ -35,7 +35,7 @@ var app = {
     onDeviceReady: function() {
         app.receivedEvent('deviceready');
         var pushNotification = window.plugins.pushNotification;
-        pushNotification.register(app.successHandler, app.errorHandler,{"senderID":"1092587381698","ecb":"app.onNotificationGCM"});
+        pushNotification.register(app.successHandler, app.errorHandler, {"badge":"true","sound":"true","alert":"true","ecb":"app.onNotificationAPN"});
 
     },
     // Update DOM on a Received Event
@@ -51,35 +51,27 @@ var app = {
     },
     // result contains any message sent from the plugin call
     successHandler: function(result) {
+        console.log("Received result " + result);
         alert('Callback Success! Result = '+result)
     },
     errorHandler:function(error) {
         alert(error);
     },
-    onNotificationGCM: function(e) {
-        switch( e.event )
-        {
-            case 'registered':
-                if ( e.regid.length > 0 )
-                {
-                    console.log("Regid " + e.regid);
-                    alert('registration id = '+e.regid);
-                }
-                break;
-
-            case 'message':
-                // this is the actual push notification. its format depends on the data model from the push server
-                alert('message = '+e.message+' msgcnt = '+e.msgcnt);
-                break;
-
-            case 'error':
-                alert('GCM error = '+e.msg);
-                break;
-
-            default:
-                alert('An unknown GCM event has occurred');
-                break;
+    onNotificationAPN: function(e) {
+        console.log("On Notification");
+        if (e.alert) {
+            console.log("Alert " + e.alert);
+            navigator.notification.alert(e.alert);
+        }
+        if (e.badge) {
+            console.log("Badge number " + e.badge);
+            var pushNotification = window.plugins.pushNotification;
+            pushNotification.setApplicationIconBadgeNumber(app.successHandler, app.errorHandler, e.badge);
+        }
+        if (e.sound) {
+            console.log("Sound passed in " + e.sound);
+            var snd = new Media(e.sound);
+            snd.play();
         }
     }
-
 };
