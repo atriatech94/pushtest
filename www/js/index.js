@@ -33,6 +33,7 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
+        cordova.plugins.notification.badge.set(10);
         var push = PushNotification.init({
             "android": {
                 "senderID": "1092587381698",
@@ -50,7 +51,7 @@ var app = {
         });
 
         push.on('notification', function(data) {
-            window.plugin.notification.badge.set(2);
+           
         	console.log("notification event");
             console.log(JSON.stringify(data));
             var cards = document.getElementById("cards");
