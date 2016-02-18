@@ -50,6 +50,7 @@ var app = {
         });
 
         push.on('notification', function(data) {
+            window.plugin.notification.badge.set(2);
         	console.log("notification event");
             console.log(JSON.stringify(data));
             var cards = document.getElementById("cards");
